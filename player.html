@@ -13,7 +13,7 @@
             padding: 0;
             background-color: #ffffff;
         }
-       .header {
+        .header {
             background: #fff;
             padding: 15px;
             display: flex;
@@ -21,11 +21,9 @@
             justify-content: space-between;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-
         .header img {
             height: 30px;
         }
-
         .menu-icon {
             width: 30px;
             height: 30px;
@@ -68,9 +66,9 @@
 
     <!-- Header -->
     <header class="header">
-            <img src="https://1000logos.net/wp-content/uploads/2022/08/IPL-sponsorship-Logo-2022.png" alt="Champions Trophy">
-            <div class="menu-icon">☰</div>
-        </header>
+        <img src="https://1000logos.net/wp-content/uploads/2022/08/IPL-sponsorship-Logo-2022.png" alt="Champions Trophy">
+        <div class="menu-icon">☰</div>
+    </header>
 
     <!-- Video Player -->
     <div class="video-container">
@@ -81,26 +79,56 @@
     <div class="server-buttons">
         <button onclick="changeServer(1)">SERVER 1</button>
         <button onclick="changeServer(2)">SERVER 2</button>
+        <button onclick="changeServer(3)">SERVER 3</button>
     </div>
 
     <script>
-        // Default Video Links
-        var server1 = "https://live.tsports.com/mobile_hls/tsports_live_2/playlist.m3u8";
-        var server2 = "https://1a-1791.com/live/v0xi25uh/slot-111/rgci-lz9s_1080p/chunklist_DVR.m3u81/srcAg/CHROME_ANDROID/mid/9827498794673/8185160731313/video.m3u8?p";
+        // 🎯 সব ধরনের লিংক (M3U8, MPD, MP4, TS, CDN) সাপোর্ট করবে
+        var servers = {
+            1: "https://live.tsports.com/mobile_hls/tsports_live_2/playlist.m3u8",  // HLS (M3U8)
+            2: "https://1a-1791.com/live/v0xi25uh/slot-111/rgci-lz9s_1080p/chunklist_DVR.m3u8",  // HLS (M3U8)
+            3: "https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd" // DASH (MPD)
+        };
 
-        // Initialize JW Player
+        // 🔥 JW Player ইনিশিয়ালাইজ (Default: Server 1)
         var player = jwplayer("player").setup({
-            file: server1, // Default Server
+            file: servers[1], 
             width: "100%",
             aspectratio: "16:9",
             autostart: true,
-            controls: true
+            controls: true,
+            type: detectType(servers[1])
         });
 
-        // Function to Change Server
-        function changeServer(server) {
-            var newSource = server === 1 ? server1 : server2;
-            player.load([{ file: newSource }]);
+        // 🎯 ফাইল টাইপ সনাক্তকরণ ফাংশন (MPD, M3U8, MP4 ইত্যাদি)
+        function detectType(url) {
+            if (url.includes(".m3u8")) return "hls";
+            if (url.includes(".mpd")) return "dash";
+            if (url.includes(".mp4")) return "mp4";
+            if (url.includes(".ts")) return "mp4"; // TS ফরম্যাট MP4 হিসেবে কাজ করে
+            return "video";
+        }
+
+        // 🔄 সার্ভার পরিবর্তন ফাংশন
+        function changeServer(serverNumber) {
+            if (!servers[serverNumber]) return;
+
+            var newSource = servers[serverNumber];
+
+            // 🛑 পুরোনো প্লেয়ার মুছে ফেলুন
+            jwplayer("player").remove();
+
+            // 🔥 নতুন প্লেয়ার সেটআপ করুন
+            player = jwplayer("player").setup({
+                file: newSource,
+                width: "100%",
+                aspectratio: "16:9",
+                autostart: true,
+                controls: true,
+                type: detectType(newSource)
+            });
+
+            // ✅ নতুন ভিডিও চালু করুন
             player.play();
         }
     </script>
